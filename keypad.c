@@ -15,6 +15,7 @@ Hardware: ATMega328
 // Define global variables.
 uint8_t rowval;
 char keych;
+char lastchar;
 
 
 // Method to initialise the keypad input and output pins then enable internal pull up resistors.
@@ -34,7 +35,7 @@ char keypad_read_method() {
 	
 	PORTD &= ~(1<<PD2 ); // Check column 1 by setting PD2 low.
 	PORTD |= (1<<PD0) | (1<<PD4); // Set remaining column pins as high.
-	_delay_us(10); // Prevent debounce issues by allowing the signal to settle.
+	_delay_us(20); // Prevent debounce issues by allowing the signal to settle.
 	
 	rowval = PIND & 0x6A;
 	
@@ -56,7 +57,7 @@ char keypad_read_method() {
 	if (keych=='$') {
 		PORTD &= ~(1<<PD0 ); // Check column 2 by setting PD0 low.
 		PORTD |= (1<<PD2) | (1<<PD4); // Set remaining column pins as high.
-		_delay_us(10); // Prevent debounce issues by allowing the signal to settle.
+		_delay_us(20); // Prevent debounce issues by allowing the signal to settle.
 		
 		rowval = PIND & 0x6A;
 		switch(rowval) {
@@ -77,7 +78,7 @@ char keypad_read_method() {
 	if (keych=='$') { 
 		PORTD &= ~(1<<PD4 ); // Check column 3 by setting PD4 low.
 		PORTD |= (1<<PD2) | (1<<PD0); // Set remaining column pins as high
-		_delay_us(10); // Prevent debounce issues by allowing the signal to settle.
+		_delay_us(20); // Prevent debounce issues by allowing the signal to settle.
 		
 		rowval = PIND & 0x6A;
 		switch(rowval) {
@@ -98,7 +99,9 @@ char keypad_read_method() {
 	// Set the lastchar value for return if a valid keypress was detected.
 	if (keych != '$')  {
 		lastchar = keych - '0';
+		return lastchar;
 	}
-	
-	return lastchar;
+	else {
+		return '$';
+	}
 }

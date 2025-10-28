@@ -20,11 +20,12 @@ extern uint16_t servoMaxTicks;
 extern uint8_t servoFrequencyHz;
 extern float servoMinPulseMs;
 extern float servoMaxPulseMs;
-extern uint16_t servoTickRange;
+uint16_t servoTickRange;
+#define PWM_PRESCALER 8
 
 // Method to initialise the servo motor controls using Timer Mode Waveform Generation Mode 14. Utilises the Servo motor Frequency and Prescaler defined above.
 // Expects F_CPU, PWM_PRESCALER, servoFrequencyHz, servoMinPulseMs and servoMaxPulseMs.
-int servo_init_method(void){
+void servo_init_method(void){
     // Reset registers for PWM setup.
     TCCR1A = 0;
     TCCR1B = 0;
@@ -60,6 +61,23 @@ int servo_init_method(void){
 void update_servo_pos_method(uint16_t potentiometerReading){
     // Use the minimum ticks to set the lowest possible position then add the calculated movement ticks. Include 20ms delay to ensure movement is complete before next action.
     uint16_t potToServo = servoMinTicks + ((float)potentiometerReading * servoTickRange) / 1023;
+    // Clamping the output at the servos operating limits.
+    if (potToServo < servoMinTicks) potToServo = servoMinTicks;
+    if (potToServo > servoMaxTicks) potToServo = servoMaxTicks;
     OCR1A = potToServo;
     _delay_ms(20);
+}
+
+
+
+// Method to determine the ticks required for a given angle change.
+// Expects the movement angle in degrees.
+// Returns the calculated servo ticks.
+uint16_t determine_servo_ticks_method(float inputAngleDegrees) {
+    float movementFraction = inputAngleDegrees / 180.0f;
+    uint16_t servoOutputTicks = servoMinTicks + (uint16_t)(movementFraction * servoTickRange);
+    // Clamping the output at the servos operating limits.
+    if (servoOutputTicks < servoMinTicks) servoOutputTicks = servoMinTicks;
+    if (servoOutputTicks > servoMaxTicks) servoOutputTicks = servoMaxTicks;
+    return servoOutputTicks;
 }

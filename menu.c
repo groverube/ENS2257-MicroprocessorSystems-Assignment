@@ -8,8 +8,9 @@ Hardware: ATMega328
 */
 
 // Import required dependency libraries.
+#include <avr/pgmspace.h>
 #include <util/delay.h>
-#include <lcd.h>
+#include "lcd.h"
 
 // Method to display the welcome screen on the LCD.
 void welcome_screen_method(void){
@@ -33,7 +34,6 @@ int display_menu_selection_method() {
 
     while (userSelection == 0) {
         // Displays the selection menu on the LCD screen.
-        lcd_clear();
         lcd_line_one();
         lcd_write_string(PSTR(" Please select from "));
         lcd_line_two();
@@ -44,12 +44,10 @@ int display_menu_selection_method() {
         lcd_write_string(PSTR("  Press # for info. "));
         _delay_ms(3000);
 
-        // SWITCH FOR AN INTERUPT -----------------------------------------------------------------------------------------------------------------------
         // While loop to pause until a key is pressed. Once false read the key and save it to lastKeyPressed.
         do {
             lastKeyPressed = keypad_read_method();
-        } while (!lastKeyPressed);
-        lcd_clear();
+        } while (lastKeyPressed == '$');
 
         switch (lastKeyPressed){
             // Display information about the functions when # is pressed.
@@ -64,7 +62,6 @@ int display_menu_selection_method() {
                 lcd_write_string(PSTR(" Press # to return. "));
                 _delay_ms(3000);
 
-                // SWITCH FOR AN INTERUPT -----------------------------------------------------------------------------------------------------------------------
                 // Wait for # to pressed before returning to the menu.
                 do {
                     lastKeyPressed = keypad_read_method();
@@ -75,7 +72,7 @@ int display_menu_selection_method() {
                 lcd_line_one();
                 lcd_write_string(PSTR("*********************"));
                 lcd_line_two();
-                lcd_write_string(PSTR( " Function 1: Adjust "));
+                lcd_write_string(PSTR("  Function 1: Adjust "));
                 lcd_line_three();
                 lcd_write_string(PSTR("  has been selected! "));
                 lcd_line_four();
@@ -136,6 +133,17 @@ int display_menu_selection_method() {
             break;
         }
     }
-
     return userSelection;
+}
+
+uint8_t function4_menu_method(void) {
+    lcd_line_one();
+    lcd_write_string(PSTR("*********************"));
+    lcd_line_two();
+    lcd_write_string(PSTR(" 1=Record 2=PlayBack "));
+    lcd_line_three();
+    lcd_write_string(PSTR("       #=Exit         "));
+    lcd_line_four();
+    lcd_write_string(PSTR("*********************"));
+    return keypad_read_method();
 }
